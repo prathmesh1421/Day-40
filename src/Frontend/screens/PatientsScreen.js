@@ -15,43 +15,61 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Animated, { FadeIn } from "react-native-reanimated";
 
 // ─── CONFIG ────────────────────────────────────────────────────
-const BASE_URL = "https://your-api.com/api"; // 🔁 Replace with your backend URL
+// Android Emulator: http://10.0.2.2:3000/api/patients
+// iOS Simulator: http://localhost:3000/api/patients
+// Real Device: http://YOUR_PC_IP:3000/api/patients
 
-// ─── API HELPERS ───────────────────────────────────────────────
+// (No axios instance used in mock mode)
+
+// ─── MOCK DATA ─────────────────────────────────────────────────
+// You can use this to test locally or as a reference for your DB
+const MOCK_PATIENTS = [
+  {
+    id: 1,
+    name: "John Doe",
+    age: "45",
+    disease: "Diabetes Type 2",
+  },
+];
+
+// ─── API HELPERS (WITH MOCK) ────────────────────────────────
 const api = {
-  getPatients: async (page = 1, limit = 10) => {
-    const res = await fetch(`${BASE_URL}/patients?page=${page}&limit=${limit}`);
-    if (!res.ok) throw new Error("Failed to fetch patients");
-    return res.json();
+  getPatients: async () => {
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return MOCK_PATIENTS;
   },
 
   addPatient: async (patient) => {
-    const res = await fetch(`${BASE_URL}/patients`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(patient),
-    });
-    if (!res.ok) throw new Error("Failed to add patient");
-    return res.json();
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const newPatient = {
+      ...patient,
+      id: MOCK_PATIENTS.length + 1,
+    };
+    MOCK_PATIENTS.unshift(newPatient);
+    return newPatient;
   },
 
   updatePatient: async (id, patient) => {
-    const res = await fetch(`${BASE_URL}/patients/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(patient),
-    });
-    if (!res.ok) throw new Error("Failed to update patient");
-    return res.json();
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const index = MOCK_PATIENTS.findIndex((p) => p.id === id);
+    if (index > -1) {
+      MOCK_PATIENTS[index] = { ...MOCK_PATIENTS[index], ...patient };
+      return MOCK_PATIENTS[index];
+    }
+    throw new Error("Patient not found");
   },
 
   deletePatient: async (id) => {
-    const res = await fetch(`${BASE_URL}/patients/${id}`, { method: "DELETE" });
-    if (!res.ok) throw new Error("Failed to delete patient");
-    return true;
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const index = MOCK_PATIENTS.findIndex((p) => p.id === id);
+    if (index > -1) {
+      MOCK_PATIENTS.splice(index, 1);
+      return true;
+    }
+    throw new Error("Patient not found");
   },
 };
-
 // ─── EDIT MODAL ────────────────────────────────────────────────
 const EditModal = ({ visible, patient, onClose, onSave, saving }) => {
   const [name, setName] = useState("");
@@ -150,7 +168,6 @@ const PatientCard = ({ item, index, onDelete, onEdit, deleting }) => {
   return (
     <Animated.View entering={animationEnter} style={styles.patientContainer}>
       <View style={styles.patientCard}>
-        {/* Top Row */}
         <View style={styles.cardTopRow}>
           <View style={styles.avatarCircle}>
             <Text style={styles.avatarText}>🧑‍⚕️</Text>
@@ -166,7 +183,6 @@ const PatientCard = ({ item, index, onDelete, onEdit, deleting }) => {
           </View>
         </View>
 
-        {/* Disease Badge */}
         <View style={styles.diseaseBadgeRow}>
           <View style={styles.diseaseBadge}>
             <Text style={styles.diseaseText} numberOfLines={1}>
@@ -175,7 +191,6 @@ const PatientCard = ({ item, index, onDelete, onEdit, deleting }) => {
           </View>
         </View>
 
-        {/* Actions */}
         <View style={styles.actionContainer}>
           <TouchableOpacity
             style={styles.editButton}
@@ -203,52 +218,56 @@ const PatientCard = ({ item, index, onDelete, onEdit, deleting }) => {
 // ─── MAIN SCREEN ───────────────────────────────────────────────
 export default function PatientsScreen({ navigation }) {
   const [patients, setPatients] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [disease, setDisease] = useState("");
-  const [refreshing, setRefreshing] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [adding, setAdding] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
   const [editModal, setEditModal] = useState({ visible: false, patient: null });
 
-  useEffect(() => {
-    fetchPatients(1, true);
-  }, []);
-
-  // ── GET ──────────────────────────────────────────────────────
-  const fetchPatients = async (pageNum = 1, reset = false) => {
+  // ── FETCH DATA ─────────────────────────────────────────────
+  const fetchPatients = async () => {
     try {
-      const result = await api.getPatients(pageNum);
-      const incoming = result.data ?? result;
-      setPatients((prev) => (reset ? incoming : [...prev, ...incoming]));
-      setPage(pageNum);
-      setHasMore(incoming.length === 10);
+      console.log("Loading patients...");
+      const result = await api.getPatients();
+      console.log("API Result:", result);
+
+      // Handle different response structures
+      let incoming = [];
+      if (Array.isArray(result)) {
+        incoming = result;
+      } else if (result && Array.isArray(result.data)) {
+        incoming = result.data;
+      } else if (result && Array.isArray(result.patients)) {
+        incoming = result.patients;
+      } else {
+        console.warn("Unexpected data format:", result);
+        incoming = [];
+      }
+
+      setPatients(incoming);
     } catch (err) {
+      console.error("Fetch Error:", err);
       Alert.alert("Error", err.message || "Could not load patients");
     }
   };
 
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchPatients(1, true);
+    await fetchPatients();
     setRefreshing(false);
   }, []);
 
-  const handleLoadMore = useCallback(async () => {
-    if (loadingMore || !hasMore) return;
-    setLoadingMore(true);
-    await fetchPatients(page + 1, false);
-    setLoadingMore(false);
-  }, [loadingMore, hasMore, page]);
-
-  // ── POST ─────────────────────────────────────────────────────
+  // ── ADD PATIENT ─────────────────────────────────────────────
   const handleAdd = async () => {
     if (!name.trim() || !age.trim() || !disease.trim()) {
-      Alert.alert("Error", "Please enter name, age and disease");
+      Alert.alert("Error", "Please fill all fields");
       return;
     }
     setAdding(true);
@@ -269,7 +288,7 @@ export default function PatientsScreen({ navigation }) {
     }
   };
 
-  // ── PUT ──────────────────────────────────────────────────────
+  // ── EDIT PATIENT ────────────────────────────────────────────
   const handleEdit = (patient) => setEditModal({ visible: true, patient });
 
   const handleSaveEdit = async (id, updatedFields) => {
@@ -287,7 +306,7 @@ export default function PatientsScreen({ navigation }) {
     }
   };
 
-  // ── DELETE ───────────────────────────────────────────────────
+  // ── DELETE PATIENT ────────────────────────────────────────
   const handleDelete = (id) => {
     Alert.alert(
       "Confirm Delete",
@@ -313,21 +332,12 @@ export default function PatientsScreen({ navigation }) {
     );
   };
 
-  const renderFooter = () =>
-    loadingMore ? (
-      <View style={styles.footerLoader}>
-        <ActivityIndicator size="small" color="#6366f1" />
-        <Text style={styles.footerText}>Loading more...</Text>
-      </View>
-    ) : null;
-
   const handleLogout = () =>
     navigation.getParent().reset({ index: 0, routes: [{ name: "Login" }] });
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
-        {/* Header */}
         <View style={styles.header}>
           <View>
             <Text style={styles.headerSub}>Hospital System</Text>
@@ -351,9 +361,6 @@ export default function PatientsScreen({ navigation }) {
               tintColor="#6366f1"
             />
           }
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.3}
-          ListFooterComponent={renderFooter}
           ListHeaderComponent={
             <>
               <View style={styles.card}>
@@ -432,7 +439,6 @@ export default function PatientsScreen({ navigation }) {
           }
         />
 
-        {/* Edit Modal */}
         <EditModal
           visible={editModal.visible}
           patient={editModal.patient}
