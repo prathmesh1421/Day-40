@@ -1,5 +1,5 @@
 import {
-  Platform,
+  // Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,40 +11,77 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 export default function DashboardScreen({ navigation }) {
   const stats = [
     { number: "120+", label: "Patients", emoji: "🧑‍⚕️" },
-    { number: "15",   label: "Doctors",  emoji: "👨‍⚕️" },
-    { number: "24/7", label: "Support",  emoji: "⏰"   },
+    { number: "15", label: "Doctors", emoji: "👨‍⚕️" },
+    { number: "24/7", label: "Support", emoji: "⏰" },
   ];
 
   const actions = [
-    { emoji: "👨‍⚕️", title: "Patients",     subtitle: "120 active records", screen: "Patients",     color: "#6366f1" },
-    { emoji: "👤",   title: "Doctors",      subtitle: "15 specialists",     screen: "Doctors",      color: "#8b5cf6" },
-    { emoji: "📅",   title: "Appointments", subtitle: "Book a slot",        screen: "Appointments", color: "#ec4899" },
-    { emoji: "💊",   title: "Pharmacy",     subtitle: "Medicines & stock",  screen: "Pharmacy",     color: "#10b981" },
-    { emoji: "🏥",   title: "Profile",      subtitle: "Hospital details",   screen: "Profile",      color: "#f59e0b" },
+    {
+      emoji: "👨‍⚕️",
+      title: "Patients",
+      subtitle: "120 active records",
+      screen: "Patients",
+      color: "#6366f1",
+    },
+    {
+      emoji: "👤",
+      title: "Doctors",
+      subtitle: "15 specialists",
+      screen: "Doctors",
+      color: "#8b5cf6",
+    },
+    {
+      emoji: "📅",
+      title: "Appointments",
+      subtitle: "Book a slot",
+      screen: "Appointments",
+      color: "#ec4899",
+    },
+    {
+      emoji: "💊",
+      title: "Pharmacy",
+      subtitle: "Medicines & stock",
+      screen: "Pharmacy",
+      color: "#10b981",
+    },
+    {
+      emoji: "🏥",
+      title: "Profile",
+      subtitle: "Hospital details",
+      screen: "Profile",
+      color: "#f59e0b",
+    },
   ];
 
   const services = [
     { icon: "🚑", label: "Emergency" },
-    { icon: "🩺", label: "OPD"       },
-    { icon: "🧪", label: "Lab"       },
-    { icon: "💊", label: "Pharmacy"  },
-    { icon: "❤️", label: "ICU"       },
-    { icon: "📅", label: "Booking"   },
+    { icon: "🩺", label: "OPD" },
+    { icon: "🧪", label: "Lab" },
+    { icon: "💊", label: "Pharmacy" },
+    { icon: "❤️", label: "ICU" },
+    { icon: "📅", label: "Booking" },
   ];
 
   return (
     <View style={s.root}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.scroll}>
-
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={s.scroll}
+      >
         {/* ── Header ── */}
-        <Animated.View entering={FadeInDown.delay(0).duration(500)} style={s.header}>
+        <Animated.View
+          entering={FadeInDown.delay(0).duration(500)}
+          style={s.header}
+        >
           <Text style={s.headerEyebrow}>Sangli Hospital</Text>
           <Text style={s.headerTitle}>Welcome back, Doctor👋</Text>
-          
         </Animated.View>
 
         {/* ── Stats ── */}
-        <Animated.View entering={FadeInDown.delay(80).duration(500)} style={s.statsRow}>
+        <Animated.View
+          entering={FadeInDown.delay(80).duration(500)}
+          style={s.statsRow}
+        >
           {stats.map((st, i) => (
             <View key={i} style={s.statBox}>
               <Text style={s.statEmoji}>{st.emoji}</Text>
@@ -73,7 +110,10 @@ export default function DashboardScreen({ navigation }) {
         </Animated.View>
 
         {actions.map((a, i) => (
-          <Animated.View key={i} entering={FadeInDown.delay(280 + i * 70).duration(400)}>
+          <Animated.View
+            key={i}
+            entering={FadeInDown.delay(280 + i * 70).duration(400)}
+          >
             <TouchableOpacity
               style={s.actionCard}
               activeOpacity={0.85}

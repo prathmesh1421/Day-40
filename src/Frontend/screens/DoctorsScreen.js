@@ -1,7 +1,6 @@
-
 // src/screens/DoctorsScreen.js
 
-import React, { useState } from "react";
+import { useState } from "react";
 
 import {
   Alert,
@@ -9,11 +8,10 @@ import {
   Image,
   Linking,
   Modal,
-  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -25,10 +23,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
-import {
-  pickImage,
-  takePhoto,
-} from "../component/imageUploader";
+import { pickImage, takePhoto } from "../utils/component/imageUploader";
 
 // ================= DOCTORS DATA =================
 
@@ -40,8 +35,7 @@ const doctors = [
     experience: "8 Years",
     phone: "+91 9876543210",
     email: "prathmesh@hospital.com",
-    image:
-      "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+    image: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
   },
 
   {
@@ -51,8 +45,7 @@ const doctors = [
     experience: "6 Years",
     phone: "+91 9876543211",
     email: "akash@hospital.com",
-    image:
-      "https://cdn-icons-png.flaticon.com/512/3774/3774299.png",
+    image: "https://cdn-icons-png.flaticon.com/512/3774/3774299.png",
   },
 
   {
@@ -62,8 +55,7 @@ const doctors = [
     experience: "5 Years",
     phone: "+91 9876543212",
     email: "priya@hospital.com",
-    image:
-      "https://cdn-icons-png.flaticon.com/512/4140/4140048.png",
+    image: "https://cdn-icons-png.flaticon.com/512/4140/4140048.png",
   },
 
   {
@@ -73,21 +65,14 @@ const doctors = [
     experience: "10 Years",
     phone: "+91 9876543213",
     email: "sanjay@hospital.com",
-    image:
-      "https://cdn-icons-png.flaticon.com/512/921/921071.png",
+    image: "https://cdn-icons-png.flaticon.com/512/921/921071.png",
   },
 ];
 
 // ================= DOCTOR CARD =================
 
-const DoctorCard = ({
-  item,
-  index,
-  onUpdateImage,
-}) => {
-  const animationEnter = FadeIn.delay(
-    index * 100
-  ).duration(500);
+const DoctorCard = ({ item, index, onUpdateImage }) => {
+  const animationEnter = FadeIn.delay(index * 100).duration(500);
 
   const translateX = useSharedValue(0);
 
@@ -95,21 +80,13 @@ const DoctorCard = ({
 
   const panGesture = Gesture.Pan()
     .onUpdate((e) => {
-      translateX.value =
-        e.translationX > 0
-          ? e.translationX
-          : 0;
+      translateX.value = e.translationX > 0 ? e.translationX : 0;
     })
 
     .onEnd(() => {
       if (translateX.value > 80) {
-        Linking.openURL(
-          `tel:${item.phone}`
-        ).catch(() =>
-          Alert.alert(
-            "Error",
-            "Unable to make call"
-          )
+        Linking.openURL(`tel:${item.phone}`).catch(() =>
+          Alert.alert("Error", "Unable to make call"),
         );
       }
 
@@ -118,15 +95,13 @@ const DoctorCard = ({
 
   // ANIMATION STYLE
 
-  const animatedStyle =
-    useAnimatedStyle(() => ({
-      transform: [
-        {
-          translateX:
-            translateX.value,
-        },
-      ],
-    }));
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateX: translateX.value,
+      },
+    ],
+  }));
 
   // CARD PRESS
 
@@ -137,42 +112,29 @@ const DoctorCard = ({
       [
         {
           text: "Call",
-          onPress: () =>
-            Linking.openURL(
-              `tel:${item.phone}`
-            ),
+          onPress: () => Linking.openURL(`tel:${item.phone}`),
         },
 
         {
           text: "Cancel",
           style: "cancel",
         },
-      ]
+      ],
     );
   };
 
   return (
     <GestureDetector gesture={panGesture}>
-      <Animated.View
-        entering={animationEnter}
-        style={styles.cardContainer}
-      >
+      <Animated.View entering={animationEnter} style={styles.cardContainer}>
         {/* SWIPE BG */}
 
         <View style={styles.swipeBackground}>
-          <Text style={styles.swipeText}>
-            📞 Swipe to Call
-          </Text>
+          <Text style={styles.swipeText}>📞 Swipe to Call</Text>
         </View>
 
         {/* MAIN CARD */}
 
-        <Animated.View
-          style={[
-            styles.card,
-            animatedStyle,
-          ]}
-        >
+        <Animated.View style={[styles.card, animatedStyle]}>
           <TouchableOpacity
             activeOpacity={0.9}
             onPress={handleCardPress}
@@ -180,77 +142,41 @@ const DoctorCard = ({
           >
             {/* IMAGE */}
 
-            <View
-              style={
-                imageStyles.imageContainer
-              }
-            >
+            <View style={imageStyles.imageContainer}>
               <Image
                 source={{
                   uri: item.image,
                 }}
-                style={
-                  imageStyles.image
-                }
+                style={imageStyles.image}
               />
 
               <TouchableOpacity
-                style={
-                  imageStyles.uploadButton
-                }
-                onPress={() =>
-                  onUpdateImage(item.id)
-                }
+                style={imageStyles.uploadButton}
+                onPress={() => onUpdateImage(item.id)}
               >
-                <Text
-                  style={
-                    imageStyles.uploadIcon
-                  }
-                >
-                  📷
-                </Text>
+                <Text style={imageStyles.uploadIcon}>📷</Text>
               </TouchableOpacity>
             </View>
 
             {/* INFO */}
 
-            <View
-              style={styles.infoContainer}
-            >
-              <Text style={styles.name}>
-                {item.name}
-              </Text>
+            <View style={styles.infoContainer}>
+              <Text style={styles.name}>{item.name}</Text>
 
-              <Text
-                style={styles.department}
-              >
-                🏥 {item.department}
-              </Text>
+              <Text style={styles.department}>🏥 {item.department}</Text>
 
-              <Text
-                style={styles.experience}
-              >
-                ⭐ {item.experience}
-              </Text>
+              <Text style={styles.experience}>⭐ {item.experience}</Text>
 
-              <Text style={styles.email}>
-                📧 {item.email}
-              </Text>
+              <Text style={styles.email}>📧 {item.email}</Text>
             </View>
 
             {/* CALL BUTTON */}
 
             <TouchableOpacity
               style={styles.iconButton}
-              onPress={() =>
-                Linking.openURL(
-                  `tel:${item.phone}`
-                )
-              }
+              onPress={() => Linking.openURL(`tel:${item.phone}`)}
             >
-              <Text style={styles.icon}>
-                📞
-              </Text>
+              <Text style={styles.icon}>📞</Text>
             </TouchableOpacity>
           </TouchableOpacity>
         </Animated.View>
@@ -261,17 +187,12 @@ const DoctorCard = ({
 
 // ================= MAIN SCREEN =================
 
-export default function DoctorsScreen({
-  navigation,
-}) {
-  const [doctorsList, setDoctorsList] =
-    useState(doctors);
+export default function DoctorsScreen({ navigation }) {
+  const [doctorsList, setDoctorsList] = useState(doctors);
 
-  const [selectedDoctorId, setSelectedDoctorId] =
-    useState(null);
+  const [selectedDoctorId, setSelectedDoctorId] = useState(null);
 
-  const [modalVisible, setModalVisible] =
-    useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   // LOGOUT
 
@@ -281,80 +202,54 @@ export default function DoctorsScreen({
 
   // OPEN MODAL
 
-  const handleUpdateImage = (
-    doctorId
-  ) => {
+  const handleUpdateImage = (doctorId) => {
     setSelectedDoctorId(doctorId);
     setModalVisible(true);
   };
 
   // GALLERY IMAGE
 
-  const handleSelectFromGallery =
-    async () => {
-      setModalVisible(false);
+  const handleSelectFromGallery = async () => {
+    setModalVisible(false);
 
-      const result =
-        await pickImage();
+    const result = await pickImage();
 
-      if (result.success) {
-        updateDoctorImage(
-          result.uri
-        );
-      } else if (
-        result.error !== "Cancelled"
-      ) {
-        Alert.alert(
-          "Error",
-          result.error
-        );
-      }
-    };
+    if (result.success) {
+      updateDoctorImage(result.uri);
+    } else if (result.error !== "Cancelled") {
+      Alert.alert("Error", result.error);
+    }
+  };
 
   // CAMERA PHOTO
 
-  const handleTakePhoto =
-    async () => {
-      setModalVisible(false);
+  const handleTakePhoto = async () => {
+    setModalVisible(false);
 
-      const result =
-        await takePhoto();
+    const result = await takePhoto();
 
-      if (result.success) {
-        updateDoctorImage(
-          result.uri
-        );
-      } else if (
-        result.error !== "Cancelled"
-      ) {
-        Alert.alert(
-          "Error",
-          result.error
-        );
-      }
-    };
+    if (result.success) {
+      updateDoctorImage(result.uri);
+    } else if (result.error !== "Cancelled") {
+      Alert.alert("Error", result.error);
+    }
+  };
 
   // UPDATE IMAGE
 
-  const updateDoctorImage = (
-    newImageUri
-  ) => {
+  const updateDoctorImage = (newImageUri) => {
     setDoctorsList((prev) =>
       prev.map((doctor) =>
-        doctor.id ===
-        selectedDoctorId
+        doctor.id === selectedDoctorId
           ? {
               ...doctor,
               image: newImageUri,
             }
-          : doctor
-      )
+          : doctor,
+      ),
     );
 
-    Alert.alert(
-      "Success",
-      "Doctor image updated!"
-    );
+    Alert.alert("Success", "Doctor image updated!");
   };
 
   return (
@@ -363,22 +258,13 @@ export default function DoctorsScreen({
 
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerSub}>
-            Hospital Management
-          </Text>
+          <Text style={styles.headerSub}>Hospital Management</Text>
 
-          <Text style={styles.headerTitle}>
-            Doctors
-          </Text>
+          <Text style={styles.headerTitle}>Doctors</Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.logoutBtn}
-          onPress={handleLogout}
-        >
-          <Text style={styles.logoutText}>
-            Logout
-          </Text>
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </View>
 
@@ -386,27 +272,16 @@ export default function DoctorsScreen({
 
       <FlatList
         data={doctorsList}
-        keyExtractor={(item) =>
-          item.id
-        }
-        renderItem={({
-          item,
-          index,
-        }) => (
+        keyExtractor={(item) => item.id}
+        renderItem={({ item, index }) => (
           <DoctorCard
             item={item}
             index={index}
-            onUpdateImage={
-              handleUpdateImage
-            }
+            onUpdateImage={handleUpdateImage}
           />
         )}
-        contentContainerStyle={
-          styles.listContent
-        }
-        showsVerticalScrollIndicator={
-          false
-        }
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
       />
 
       {/* MODAL */}
@@ -415,94 +290,41 @@ export default function DoctorsScreen({
         visible={modalVisible}
         transparent
         animationType="slide"
-        onRequestClose={() =>
-          setModalVisible(false)
-        }
+        onRequestClose={() => setModalVisible(false)}
       >
         <View style={modalStyles.overlay}>
-          <View
-            style={
-              modalStyles.modalContent
-            }
-          >
-            <Text
-              style={
-                modalStyles.modalTitle
-              }
-            >
-              Update Doctor Image
-            </Text>
+          <View style={modalStyles.modalContent}>
+            <Text style={modalStyles.modalTitle}>Update Doctor Image</Text>
 
             {/* GALLERY */}
 
             <TouchableOpacity
-              style={
-                modalStyles.optionButton
-              }
-              onPress={
-                handleSelectFromGallery
-              }
+              style={modalStyles.optionButton}
+              onPress={handleSelectFromGallery}
             >
-              <Text
-                style={
-                  modalStyles.optionIcon
-                }
-              >
-                🖼️
-              </Text>
+              <Text style={modalStyles.optionIcon}>🖼️</Text>
 
-              <Text
-                style={
-                  modalStyles.optionText
-                }
-              >
-                Choose from Gallery
-              </Text>
+              <Text style={modalStyles.optionText}>Choose from Gallery</Text>
             </TouchableOpacity>
 
             {/* CAMERA */}
 
             <TouchableOpacity
-              style={
-                modalStyles.optionButton
-              }
+              style={modalStyles.optionButton}
               onPress={handleTakePhoto}
             >
-              <Text
-                style={
-                  modalStyles.optionIcon
-                }
-              >
-                📷
-              </Text>
+              <Text style={modalStyles.optionIcon}>📷</Text>
 
-              <Text
-                style={
-                  modalStyles.optionText
-                }
-              >
-                Take Photo
-              </Text>
+              <Text style={modalStyles.optionText}>Take Photo</Text>
             </TouchableOpacity>
 
             {/* CANCEL */}
 
             <TouchableOpacity
-              style={[
-                modalStyles.optionButton,
-                modalStyles.cancelButton,
-              ]}
-              onPress={() =>
-                setModalVisible(false)
-              }
+              style={[modalStyles.optionButton, modalStyles.cancelButton]}
+              onPress={() => setModalVisible(false)}
             >
-              <Text
-                style={
-                  modalStyles.cancelText
-                }
-              >
-                Cancel
-              </Text>
+              <Text style={modalStyles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -532,8 +354,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 30,
 
     flexDirection: "row",
-    justifyContent:
-      "space-between",
+    justifyContent: "space-between",
     alignItems: "center",
   },
 
@@ -699,8 +520,7 @@ const modalStyles = StyleSheet.create({
   overlay: {
     flex: 1,
 
-    backgroundColor:
-      "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.5)",
 
     justifyContent: "center",
     alignItems: "center",
